@@ -122,13 +122,3 @@ PESSOA (codigo, documento, nome,
 | [sql.js](https://github.com/sql-js/sql.js) | 1.10.2 | SQLite compilado em WebAssembly |
 
 ---
-
-## 💡 Dicas para a Aula
-
-- Mantenha o **DevTools aberto** (F12 → Console) para ver erros SQL em tempo real
-- Use o **Console SQL** da interface para testar comandos antes de adicioná-los aos scripts
-- O botão **🗑️ Limpar Banco** reinicia o banco do zero (útil para recomeçar os exercícios)
-- O botão **💾 Exportar .db** salva o banco para abrir em ferramentas como [DB Browser for SQLite](https://sqlitebrowser.org/)
-- A constraint `UNIQUE (id_estudante)` na tabela `Orientacao` garante que cada estudante tenha **no máximo um orientador**
-
-# CRUD-JS
