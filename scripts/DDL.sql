@@ -21,72 +21,113 @@
 --   logradouro, numero, complemento, bairro, cidade, estado, cep
 -- ================================================================
 
-
 -- ── 1. Tabela PESSOA ──────────────────────────────────────────
 
-CREATE TABLE PESSOA (
-    id_pessoa INTEGER PRIMARY KEY AUTOINCREMENT,
-    id_orientador ,
-    nome TEXT,
+CREATE TABLE pessoa (
+    codigo INTEGER PRIMARY KEY AUTOINCREMENT,
     documento TEXT NOT NULL UNIQUE,
+    nome TEXT NOT NULL,
     logradouro TEXT,
     numero TEXT,
     complemento TEXT,
     bairro TEXT,
     cidade TEXT,
     estado TEXT,
-    cep INT
-    );
+    cep TEXT
+);
 
--- ── 2. Tabela ESTUDANTE (especialização de Pessoa) ────────────
+-- ── 2. Tabela FUNCIONARIO (especialização de Pessoa) ──────────
 
-CREATE TABLE ESTUDANTE (
-    id_pessoa INTEGER PRIMARY KEY PESSOA(id_pessoa),
-    id_orientador INTEGER REFERENCES funcionario(id_pessoa),
-    curso TEXT NOT NULL,
-    num_matricula TEXT NOT NULL UNIQUE,
-    id_orientador TEXT
-    );
-
--- ── 3. Tabela FUNCIONARIO (especialização de Pessoa) ──────────
-
-CREATE TABLE FUNCIONARIO (
-    id_pessoa INTEGER PRIMARY KEY REFERENCES PESSOA(id_pessoa),
+CREATE TABLE funcionario (
+    codigo INTEGER PRIMARY KEY,
     registro_funcional TEXT NOT NULL UNIQUE,
-    setor TEXT NOT NULL,
-    data_admissao TEXT
-    );
+    data_admissao TEXT NOT NULL,
+    setor_lotacao TEXT NOT NULL,
+
+    FOREIGN KEY (codigo)
+        REFERENCES pessoa(codigo)
+        ON DELETE CASCADE
+);
+
+-- ── 3. Tabela ESTUDANTE (especialização de Pessoa) ────────────
+
+CREATE TABLE estudante (
+    codigo INTEGER PRIMARY KEY,
+    matricula TEXT NOT NULL UNIQUE,
+    curso TEXT NOT NULL,
+    id_orientador INTEGER,
+
+    FOREIGN KEY (codigo)
+        REFERENCES pessoa(codigo)
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (id_orientador)
+        REFERENCES funcionario(codigo)
+        ON DELETE SET NULL
+);
+
 
 -- ── 4. Tabela DISCIPLINA ──────────────────────────────────────
 
-CREATE TABLE DISCIPLINA (
-    codigo_disciplina INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT,
-    carga INTEGER
-    );
+CREATE TABLE disciplina (
+    codigo TEXT PRIMARY KEY,
+    nome TEXT NOT NULL,
+    carga_horaria INTEGER NOT NULL
+        CHECK (carga_horaria > 0)
+);
 
 -- ── 5. Tabela MATRICULA_DISCIPLINA (N:M com atributos) ────────
 
-CREATE TABLE MATRICULA (
-    id_pessoa INTEGER PRIMARY KEY,
-    codigo_disciplina INTEGER PRIMARY KEY,
-    nota FLOAT,
-    semestre INTEGER,
-    ano INTEGER
-    );
+CREATE TABLE matricula_disciplina (
+    id_estudante INTEGER NOT NULL,
+    disciplina_codigo TEXT NOT NULL,
+    semestre INTEGER NOT NULL,
+    ano INTEGER NOT NULL,
+    nota_final REAL,
+
+    PRIMARY KEY (
+        id_estudante,
+        disciplina_codigo,
+        semestre,
+        ano
+    ),
+
+    FOREIGN KEY (id_estudante)
+        REFERENCES ESTUDANTE(codigo),
+
+    FOREIGN KEY (disciplina_codigo)
+        REFERENCES DISCIPLINA(codigo),
+
+    CHECK (semestre IN (1, 2)),
+    CHECK (nota_final BETWEEN 0 AND 10)
+);
 
 -- ── 6. Tabela MINISTRA (N:M Funcionário × Disciplina) ─────────
 
-CREATE TABLE MINISTRA (
-    id_pessoa INTEGER PRIMARY KEY,
-    codigo_disciplina INTEGER PRIMARY KEY,
-    aulas INTEGER
-    );
+CREATE TABLE ministra (
+    id_funcionario INTEGER NOT NULL,
+    disciplina_codigo TEXT NOT NULL,
 
--- ── 7. Tabela ORIENTACAO (autorrelacionamento via Funcionário) ─
+    PRIMARY KEY (id_funcionario, disciplina_codigo),
 
-CREATE TABLE ORIENTACAO (
-    id_pessoa INTEGER PRIMARY KEY,
-    codigo_disciplina INTEGER PRIMARY KEY,
-    aulas INTEGER
-    );
+    FOREIGN KEY (id_funcionario)
+        REFERENCES FUNCIONARIO(codigo),
+
+    FOREIGN KEY (disciplina_codigo)
+        REFERENCES DISCIPLINA(codigo)
+);
+
+-- ── 7. Tabela ORIENTACAO ───────────────────────────────────────────────
+
+CREATE TABLE orientacao (
+    id_funcionario INTEGER NOT NULL,
+    id_estudante INTEGER NOT NULL,
+
+    PRIMARY KEY (id_estudante),
+
+    FOREIGN KEY (id_funcionario)
+        REFERENCES funcionario(codigo),
+
+    FOREIGN KEY (id_estudante)
+        REFERENCES estudante(codigo)
+);
